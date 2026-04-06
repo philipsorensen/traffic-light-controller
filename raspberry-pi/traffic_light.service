@@ -1,0 +1,12 @@
+[Unit]
+Description=Traffic Light Controller
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/traffic-light/traffic_light.py
+Restart=always
+RestartSec=5
+User=pi
+
+[Install]
+WantedBy=multi-user.target
