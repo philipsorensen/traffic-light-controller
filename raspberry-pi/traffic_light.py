@@ -32,13 +32,13 @@ def setup_gpio():
     GPIO.setwarnings(False)
     for pin in PINS:
         GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin, GPIO.LOW)
+        GPIO.output(pin, GPIO.HIGH)  # HIGH = OFF (active-low relay)
 
 
 def cleanup(signum=None, frame=None):
     log.info("Shutting down — cleaning up GPIO")
     for pin in PINS:
-        GPIO.output(pin, GPIO.LOW)
+        GPIO.output(pin, GPIO.HIGH)  # HIGH = OFF (active-low relay)
     GPIO.cleanup()
     sys.exit(0)
 
@@ -48,9 +48,10 @@ def cleanup(signum=None, frame=None):
 # ---------------------------------------------------------------------------
 
 def set_lights(red=False, yellow=False, green=False):
-    GPIO.output(PIN_RED,    GPIO.HIGH if red    else GPIO.LOW)
-    GPIO.output(PIN_YELLOW, GPIO.HIGH if yellow else GPIO.LOW)
-    GPIO.output(PIN_GREEN,  GPIO.HIGH if green  else GPIO.LOW)
+    # Active-low relay: LOW = ON, HIGH = OFF
+    GPIO.output(PIN_RED,    GPIO.LOW if red    else GPIO.HIGH)
+    GPIO.output(PIN_YELLOW, GPIO.LOW if yellow else GPIO.HIGH)
+    GPIO.output(PIN_GREEN,  GPIO.LOW if green  else GPIO.HIGH)
 
 
 def fetch_state():
