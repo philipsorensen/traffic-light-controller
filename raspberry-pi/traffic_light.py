@@ -138,6 +138,16 @@ def mode_warning(settings):
     time.sleep(interval)
 
 
+def mode_all_flash(settings):
+    """All three lights flash together with configurable on/off times."""
+    on_time  = settings.get("all_flash_on_time",  0.5)
+    off_time = settings.get("all_flash_off_time", 0.5)
+    set_lights(red=True, yellow=True, green=True)
+    time.sleep(on_time)
+    set_lights()
+    time.sleep(off_time)
+
+
 def mode_party(settings):
     """All lights flash in a rapid random pattern."""
     interval = settings.get("flash_interval", 0.5)
@@ -163,6 +173,7 @@ _MODE_HANDLERS = {
     "off":           lambda s: mode_off(),
     "traffic_light": mode_traffic_light,
     "warning":       mode_warning,
+    "all_flash":     mode_all_flash,
     "party":         mode_party,
 }
 

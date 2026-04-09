@@ -26,6 +26,8 @@ $defaults = [
         'green_duration'      => 5,
         'yellow_duration'     => 2,
         'flash_interval'      => 0.5,
+        'all_flash_on_time'   => 0.5,
+        'all_flash_off_time'  => 0.5,
     ],
 ];
 
@@ -89,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Save mode
     if (isset($_POST['mode']) && is_authenticated()) {
-        $allowed_modes = ['off', 'traffic_light', 'warning', 'party'];
+        $allowed_modes = ['off', 'traffic_light', 'warning', 'all_flash', 'party'];
         $mode = in_array($_POST['mode'], $allowed_modes) ? $_POST['mode'] : 'off';
 
         $settings = [
@@ -97,7 +99,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'red_yellow_duration' => max(1, (int)($_POST['red_yellow_duration'] ?? 1)),
             'green_duration'      => max(1, (int)($_POST['green_duration']      ?? 5)),
             'yellow_duration'     => max(1, (int)($_POST['yellow_duration']     ?? 2)),
-            'flash_interval'      => max(0.1, min(5.0, (float)($_POST['flash_interval'] ?? 0.5))),
+            'flash_interval'      => max(0.1, min(5.0, (float)($_POST['flash_interval']     ?? 0.5))),
+            'all_flash_on_time'   => max(0.1, min(5.0, (float)($_POST['all_flash_on_time']  ?? 0.5))),
+            'all_flash_off_time'  => max(0.1, min(5.0, (float)($_POST['all_flash_off_time'] ?? 0.5))),
         ];
 
         save_state(['mode' => $mode, 'settings' => $settings]);
@@ -194,6 +198,7 @@ $saved    = isset($_GET['saved']);
                         'off'           => ['label' => 'Off',          'icon' => '⚫', 'desc' => 'All lights off'],
                         'traffic_light' => ['label' => 'Traffic Light', 'icon' => '🚦', 'desc' => 'Standard cycle'],
                         'warning'       => ['label' => 'Warning',       'icon' => '⚠️', 'desc' => 'Yellow flashing'],
+                        'all_flash'     => ['label' => 'All Flash',     'icon' => '💡', 'desc' => 'All lights flashing'],
                         'party'         => ['label' => 'Party',         'icon' => '🎉', 'desc' => 'Random flashing'],
                     ];
                     foreach ($modes as $value => $info):
@@ -243,6 +248,25 @@ $saved    = isset($_GET['saved']);
                     class="w-24 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
 
+            <!-- Settings: all flash on/off times -->
+            <div id="settings-all-flash" class="space-y-3 <?= $mode !== 'all_flash' ? 'hidden' : '' ?>">
+                <p class="text-sm font-medium text-gray-300">Flash timing (seconds)</p>
+                <div class="flex items-center gap-4">
+                    <label class="w-32 text-sm text-gray-400">On time</label>
+                    <input type="number" name="all_flash_on_time"
+                        value="<?= number_format((float)($settings['all_flash_on_time'] ?? 0.5), 1) ?>"
+                        min="0.1" max="5" step="0.1"
+                        class="w-24 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="w-32 text-sm text-gray-400">Off time</label>
+                    <input type="number" name="all_flash_off_time"
+                        value="<?= number_format((float)($settings['all_flash_off_time'] ?? 0.5), 1) ?>"
+                        min="0.1" max="5" step="0.1"
+                        class="w-24 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+
             <div class="flex items-center gap-3 pt-2">
                 <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition">
                     Save
@@ -271,6 +295,7 @@ $saved    = isset($_GET['saved']);
         const mode = document.querySelector('input[name="mode"]:checked')?.value;
         document.getElementById('settings-traffic').classList.toggle('hidden', mode !== 'traffic_light');
         document.getElementById('settings-flash').classList.toggle('hidden', !['warning', 'party'].includes(mode));
+        document.getElementById('settings-all-flash').classList.toggle('hidden', mode !== 'all_flash');
     }
     </script>
 
